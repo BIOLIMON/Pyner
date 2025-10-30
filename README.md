@@ -25,7 +25,7 @@ Pyner is a systematic tool for mining NCBI databases (BioProject, SRA, GEO, PubM
 ### From source
 
 ```bash
-git clone https://github.com/yourlab/pyner.git
+git clone https://github.com/BIOLIMON/pyner.git
 cd pyner
 pip install -e .
 ```
