@@ -2,6 +2,8 @@
 
 **Minería de datos bioinformáticos compatible con PRISMA para investigación en transcriptómica vegetal**
 
+Nico no sigas
+
 Pyner es una herramienta sistemática para extraer datos de bases de datos NCBI (BioProject, SRA, GEO, PubMed) y analizar datasets de RNA-seq. Construido siguiendo las [guías PRISMA 2020](http://www.prisma-statement.org/), proporciona documentación completa del proceso de búsqueda y selección para meta-análisis reproducibles.
 
 ## Características
