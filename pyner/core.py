@@ -162,9 +162,6 @@ class DataMiner:
         """
         Search all NCBI databases and collect IDs.
 
-        This is a placeholder - actual implementation would use Bio.Entrez
-        to search BioProject, SRA, GEO, and PubMed.
-
         Args:
             organism: Target organism
             condition: Experimental condition
@@ -173,19 +170,41 @@ class DataMiner:
         Returns:
             Dictionary mapping database names to lists of IDs
         """
-        print("Searching NCBI databases...")
-        print(f"  Query: ({organism}) AND ({condition}) AND ({experiment})")
+        from .fetchers import (
+            BioProjectFetcher,
+            SRAFetcher,
+            GEOFetcher,
+            PubMedFetcher
+        )
 
-        # TODO: Implement actual Entrez searches
-        # This is a placeholder showing the expected structure
-        results = {
-            "bioproject": [],
-            "sra": [],
-            "gds": [],
-            "pubmed": []
-        }
+        print("Searching NCBI databases...")
+        print(f"  Query: ({organism}) AND ({condition}) AND ({experiment})\n")
+
+        results = {}
+
+        # Search BioProject
+        print("Searching BioProject...")
+        bioproject_fetcher = BioProjectFetcher(self.config)
+        results["bioproject"] = bioproject_fetcher.fetch_ids(organism, condition, experiment)
+
+        # Search SRA
+        print("\nSearching SRA...")
+        sra_fetcher = SRAFetcher(self.config)
+        results["sra"] = sra_fetcher.fetch_ids(organism, condition, experiment)
+
+        # Search GEO
+        print("\nSearching GEO...")
+        geo_fetcher = GEOFetcher(self.config)
+        results["gds"] = geo_fetcher.fetch_ids(organism, condition, experiment)
+
+        # Search PubMed
+        print("\nSearching PubMed...")
+        pubmed_fetcher = PubMedFetcher(self.config)
+        results["pubmed"] = pubmed_fetcher.fetch_ids(organism, condition, experiment)
 
         # Record in PRISMA flow
+        print("\nSearch Summary:")
+        print("-" * 40)
         for database, ids in results.items():
             self.prisma_flow.add_identified(database, len(ids))
             print(f"  {database}: {len(ids):,} records")
@@ -196,26 +215,69 @@ class DataMiner:
         """
         Fetch detailed metadata for all retrieved IDs.
 
-        This is a placeholder - actual implementation would use Bio.Entrez
-        to fetch summaries and parse them.
-
         Args:
             raw_results: Dictionary of database IDs
 
         Returns:
             DataFrame with metadata for all records
         """
+        from .fetchers import (
+            BioProjectFetcher,
+            SRAFetcher,
+            GEOFetcher,
+            PubMedFetcher
+        )
+        from .parsers import (
+            parse_bioproject_summary,
+            parse_sra_summary,
+            parse_geo_summary,
+            parse_pubmed_summary
+        )
+
         print("Fetching metadata for retrieved records...")
 
         all_records = []
 
-        # TODO: Implement actual metadata fetching
-        # This is a placeholder
+        # Fetch and parse BioProject metadata
+        if raw_results.get("bioproject"):
+            print("\nFetching BioProject metadata...")
+            bioproject_fetcher = BioProjectFetcher(self.config)
+            summaries = bioproject_fetcher.fetch_summaries(raw_results["bioproject"])
+            records = parse_bioproject_summary(summaries, self.prisma_flow.condition)
+            all_records.extend(records)
+            print(f"  Parsed {len(records):,} BioProject records")
+
+        # Fetch and parse SRA metadata
+        if raw_results.get("sra"):
+            print("\nFetching SRA metadata...")
+            sra_fetcher = SRAFetcher(self.config)
+            summaries = sra_fetcher.fetch_summaries(raw_results["sra"])
+            records = parse_sra_summary(summaries, self.prisma_flow.condition)
+            all_records.extend(records)
+            print(f"  Parsed {len(records):,} SRA records")
+
+        # Fetch and parse GEO metadata
+        if raw_results.get("gds"):
+            print("\nFetching GEO metadata...")
+            geo_fetcher = GEOFetcher(self.config)
+            summaries = geo_fetcher.fetch_summaries(raw_results["gds"])
+            records = parse_geo_summary(summaries, self.prisma_flow.condition)
+            all_records.extend(records)
+            print(f"  Parsed {len(records):,} GEO records")
+
+        # Fetch and parse PubMed metadata
+        if raw_results.get("pubmed"):
+            print("\nFetching PubMed metadata...")
+            pubmed_fetcher = PubMedFetcher(self.config)
+            summaries = pubmed_fetcher.fetch_summaries(raw_results["pubmed"])
+            records = parse_pubmed_summary(summaries, self.prisma_flow.condition)
+            all_records.extend(records)
+            print(f"  Parsed {len(records):,} PubMed records")
 
         df = pd.DataFrame(all_records)
 
         self.prisma_flow.set_screened(len(df))
-        print(f"  Metadata retrieved for {len(df):,} records")
+        print(f"\nTotal metadata retrieved: {len(df):,} records")
 
         return df
 

@@ -6,12 +6,17 @@ Pyner is a systematic tool for mining NCBI databases (BioProject, SRA, GEO, PubM
 
 ## Features
 
-- 🔍 **Multi-database Search**: Query BioProject, SRA, GEO, and PubMed simultaneously
+- 🔍 **Multi-database Search**: Query 6+ databases simultaneously
+  - **NCBI**: BioProject, SRA, GEO, PubMed
+  - **EBI**: ENA, BioStudies (planned)
+  - **Plant-specific**: PlantExp, Ensembl Plants (planned)
 - 📊 **PRISMA Compliance**: Automatic generation of flow diagrams, screening logs, and quality reports
-- ✅ **Quality Assessment**: Evaluate metadata completeness and reliability
+- ✅ **Quality Assessment**: Evaluate metadata completeness and reliability (0-100 scoring with grades A-F)
 - 🌱 **Plant-focused**: Designed for plant transcriptomics but works with any organism
+- 🧬 **Tissue Inference**: Automatic tissue type detection with confidence levels
 - 📝 **Full Documentation**: Track every decision from identification to inclusion
 - 🔄 **Reproducible**: Version-controlled protocols and detailed logging
+- 🚀 **Extensible**: Modular architecture for adding new databases
 
 ## Installation
 
@@ -404,12 +409,22 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Status**: Alpha - Core functionality in development
+**Status**: Beta - Core NCBI functionality implemented
+
+**Completed**:
+- [x] NCBI fetchers (BioProject, SRA, GEO, PubMed)
+- [x] NCBI parsers with standardized output
+- [x] PRISMA flow tracking
+- [x] Quality assessment system
+- [x] Screening log generation
+- [x] Query builder with synonym expansion
+- [x] Tissue inference (keyword-based)
 
 **Roadmap**:
-- [ ] Complete NCBI fetcher implementation
-- [ ] Add tissue inference for SRA records
+- [ ] EBI fetchers (ENA, BioStudies)
+- [ ] Enhanced tissue inference via BioSample XML parsing
 - [ ] Implement visualization module
-- [ ] Add support for additional databases
+- [ ] Add PlantExp and Ensembl Plants support
 - [ ] Create web interface
 - [ ] Add machine learning for quality prediction
+- [ ] Duplicate detection across databases
