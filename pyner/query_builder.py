@@ -206,7 +206,7 @@ class QueryBuilder:
             "page": "1"
         }
 
-    def _expand_organism(self, organism: str, separator: " OR ") -> str:
+    def _expand_organism(self, organism: str, separator: str = " OR ") -> str:
         """
         Expand organism name with common variations.
 
@@ -235,7 +235,7 @@ class QueryBuilder:
         else:
             return separator.join(terms)
 
-    def _expand_condition(self, condition: str, separator: " OR ") -> str:
+    def _expand_condition(self, condition: str, separator: str = " OR ") -> str:
         """
         Expand condition with synonyms.
 
@@ -269,7 +269,7 @@ class QueryBuilder:
 
         return separator.join(terms)
 
-    def _expand_experiment(self, experiment: str, separator: " OR ") -> str:
+    def _expand_experiment(self, experiment: str, separator: str = " OR ") -> str:
         """
         Expand experiment type with variations.
 

@@ -2,6 +2,8 @@
 
 **PRISMA-compliant bioinformatics data mining for plant transcriptomics research**
 
+[**🇪🇸 Versión en Español**](README_ES.md)
+
 Pyner is a systematic tool for mining NCBI databases (BioProject, SRA, GEO, PubMed) to retrieve and analyze RNA-seq datasets. Built with [PRISMA 2020 guidelines](http://www.prisma-statement.org/) in mind, it provides comprehensive documentation of the search and screening process for reproducible meta-analyses.
 
 ## Features
