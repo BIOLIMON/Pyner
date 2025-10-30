@@ -23,7 +23,7 @@ Pyner es una herramienta sistemática para extraer datos de bases de datos NCBI 
 ### Desde código fuente
 
 ```bash
-git clone https://github.com/yourlab/pyner.git
+git clone https://github.com/BIOLIMON/pyner.git
 cd pyner
 pip install -e .
 ```
