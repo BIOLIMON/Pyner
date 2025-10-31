@@ -1,10 +1,10 @@
 # Pyner
 
-**PRISMA-compliant bioinformatics data mining for plant transcriptomics research**
+**PRISMA-compliant bioinformatics data mining for plant genomics research**
 
 [**🇪🇸 Versión en Español**](README_ES.md)
 
-Pyner is a systematic tool for mining NCBI databases (BioProject, SRA, GEO, PubMed) to retrieve and analyze RNA-seq datasets. Built with [PRISMA 2020 guidelines](http://www.prisma-statement.org/) in mind, it provides comprehensive documentation of the search and screening process for reproducible meta-analyses.
+Pyner is a systematic tool for mining NCBI databases (BioProject, SRA, GEO, PubMed) to retrieve and analyze diverse plant bioinformatics datasets including transcriptomics (RNA-seq), genomics (WGS), epigenomics (ChIP-seq, ATAC-seq, bisulfite-seq), and proteomics. Built with [PRISMA 2020 guidelines](http://www.prisma-statement.org/) in mind, it provides comprehensive documentation of the search and screening process for reproducible meta-analyses.
 
 ## Features
 
@@ -12,10 +12,16 @@ Pyner is a systematic tool for mining NCBI databases (BioProject, SRA, GEO, PubM
   - **NCBI**: BioProject, SRA, GEO, PubMed
   - **EBI**: ENA, BioStudies (planned)
   - **Plant-specific**: PlantExp, Ensembl Plants (planned)
+- 🧬 **Diverse Experiment Types**: Supports multiple bioinformatics approaches
+  - **Transcriptomics**: RNA-seq, single-cell RNA-seq, microarray, small RNA
+  - **Genomics**: WGS, resequencing, targeted sequencing, ddRAD-seq
+  - **Epigenomics**: ChIP-seq, ATAC-seq, bisulfite-seq, DNase-seq, MNase-seq
+  - **Proteomics**: Mass spectrometry, phosphoproteomics
+  - **Other**: Hi-C, CLIP-seq, ribosome profiling, degradome
 - 📊 **PRISMA Compliance**: Automatic generation of flow diagrams, screening logs, and quality reports
 - ✅ **Quality Assessment**: Evaluate metadata completeness and reliability (0-100 scoring with grades A-F)
-- 🌱 **Plant-focused**: Designed for plant transcriptomics but works with any organism
-- 🧬 **Tissue Inference**: Automatic tissue type detection with confidence levels
+- 🌱 **Plant-focused**: Comprehensive coverage of plant species from model organisms to major crops
+- 🌿 **Sample Type Detection**: Automatic plant tissue/organ detection covering vegetative and reproductive structures
 - 📝 **Full Documentation**: Track every decision from identification to inclusion
 - 🔄 **Reproducible**: Version-controlled protocols and detailed logging
 - 🚀 **Extensible**: Modular architecture for adding new databases
@@ -60,10 +66,23 @@ EOF
 ### 2. Run a search
 
 ```bash
+# Example 1: RNA-seq experiment (transcriptomics)
 pyner --organism "Arabidopsis thaliana" \
       --condition "salt stress" \
       --experiment "RNA-seq" \
-      --label salt
+      --label salt_rna
+
+# Example 2: ChIP-seq experiment (epigenomics)
+pyner --organism "Oryza sativa" \
+      --condition "drought" \
+      --experiment "ChIP-seq" \
+      --label rice_drought_chip
+
+# Example 3: Bisulfite-seq (DNA methylation)
+pyner --organism "Zea mays" \
+      --condition "cold stress" \
+      --experiment "bisulfite-seq" \
+      --label maize_cold_methyl
 ```
 
 ### 3. Check the outputs

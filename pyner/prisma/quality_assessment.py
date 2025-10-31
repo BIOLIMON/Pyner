@@ -2,12 +2,14 @@
 Quality assessment module for PRISMA compliance.
 
 Evaluates metadata completeness and quality for retrieved records.
+Uses plant-specific quality keywords for diverse experiment types.
 """
 
 from typing import Dict, List, Optional, Any
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
+from ..domain_vocabularies import QUALITY_KEYWORDS, METHOD_KEYWORDS
 
 
 class QualityAssessor:
@@ -127,7 +129,9 @@ class QualityAssessor:
         Checks for:
         - Non-empty title
         - Minimum length
-        - Presence of key biological terms
+        - Presence of key biological terms (plant-specific)
+
+        Uses comprehensive plant biology keywords from domain vocabularies.
         """
         if not title or not title.strip():
             return 0.0
@@ -140,12 +144,12 @@ class QualityAssessor:
         elif len(title) > 20:
             score += 15.0
 
-        # Check for biological keywords
-        keywords = [
-            "stress", "response", "tissue", "development", "expression",
-            "transcriptome", "RNA-seq", "gene", "regulation"
-        ]
-        found_keywords = sum(1 for kw in keywords if kw.lower() in title.lower())
+        # Check for biological keywords from domain vocabularies
+        # Combine general and plant-specific keywords
+        keywords = QUALITY_KEYWORDS["general"] + QUALITY_KEYWORDS["plant_specific"]
+
+        title_lower = title.lower()
+        found_keywords = sum(1 for kw in keywords if kw.lower() in title_lower)
         score += min(found_keywords * 10, 40)
 
         return min(score, 100.0)
@@ -157,7 +161,10 @@ class QualityAssessor:
         Checks for:
         - Non-empty description
         - Sufficient length
-        - Informative content
+        - Informative content with methodological keywords
+
+        Uses comprehensive methodological keywords covering transcriptomics,
+        genomics, epigenomics, proteomics, and other plant biology methods.
         """
         if not description or not description.strip():
             return 0.0
@@ -175,12 +182,14 @@ class QualityAssessor:
         else:
             score += 10.0
 
-        # Check for methodological keywords
-        method_keywords = [
-            "RNA", "sequencing", "library", "reads", "sample", "replicate",
-            "condition", "treatment", "control", "analysis"
-        ]
-        found_methods = sum(1 for kw in method_keywords if kw.lower() in description.lower())
+        # Check for methodological keywords from domain vocabularies
+        # Flatten all method keywords from different experiment types
+        all_method_keywords = []
+        for method_type, keywords in METHOD_KEYWORDS.items():
+            all_method_keywords.extend(keywords)
+
+        description_lower = description.lower()
+        found_methods = sum(1 for kw in all_method_keywords if kw.lower() in description_lower)
         score += min(found_methods * 4, 40)
 
         return min(score, 100.0)

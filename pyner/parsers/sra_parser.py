@@ -1,11 +1,13 @@
 """
 Parser for SRA summaries.
 
-Extracts structured metadata from SRA records, including tissue information.
+Extracts structured metadata from SRA records, including plant tissue/sample information.
+Supports comprehensive plant sample types from vegetative and reproductive organs.
 """
 
 from typing import List, Dict, Any
 import re
+from ..domain_vocabularies import SAMPLE_TYPE_KEYWORDS, detect_domain_from_organism
 
 
 class SRAParser:
@@ -13,19 +15,14 @@ class SRAParser:
     Parser for NCBI SRA summaries.
 
     Extracts experiment information including title, library info,
-    organism, and tissue annotations.
+    organism, and tissue/sample type annotations.
+    Uses comprehensive plant vocabulary from domain_vocabularies.
     """
 
     def __init__(self):
-        """Initialize SRA parser."""
-        # Common tissue keywords for inference
-        self.tissue_keywords = [
-            'root', 'leaf', 'leaves', 'shoot', 'stem', 'flower', 'seed',
-            'fruit', 'berry', 'petal', 'sepal', 'carpel', 'stamen',
-            'cotyledon', 'hypocotyl', 'radicle', 'meristem', 'bark',
-            'xylem', 'phloem', 'pollen', 'ovule', 'embryo', 'endosperm',
-            'whole plant', 'seedling', 'callus', 'culture', 'cell'
-        ]
+        """Initialize SRA parser with plant-specific sample type keywords."""
+        # Use comprehensive plant tissue/sample keywords from domain vocabularies
+        self.tissue_keywords = SAMPLE_TYPE_KEYWORDS
 
     def parse_summaries(self, summaries: List[dict], condition: str) -> List[Dict[str, Any]]:
         """

@@ -2,9 +2,11 @@
 Query builder for constructing database-specific search queries.
 
 Handles different query syntaxes for NCBI, EBI, and other databases.
+Supports diverse plant bioinformatics experiments beyond just RNA-seq.
 """
 
 from typing import List, Dict, Optional
+from .domain_vocabularies import CONDITION_SYNONYMS, EXPERIMENT_SYNONYMS
 
 
 class QueryBuilder:
@@ -48,7 +50,7 @@ class QueryBuilder:
             ...     "RNA-seq"
             ... )
             >>> print(query)
-            "(Arabidopsis thaliana[Organism]) AND (salt stress OR salt OR NaCl) AND (RNA-seq OR RNAseq OR transcriptome)"
+            "(Arabidopsis thaliana[Organism]) AND (salt stress OR salt OR NaCl OR salinity OR sodium chloride OR saline OR ionic stress) AND (RNA-seq OR RNAseq OR RNA seq OR transcriptome OR transcriptomic OR transcriptomics)"
         """
         # Expand organism (add common variations)
         organism_terms = self._expand_organism(organism)
@@ -86,7 +88,7 @@ class QueryBuilder:
         """
         Build query specifically for SRA database.
 
-        SRA allows additional filters like strategy:RNA-Seq
+        SRA allows additional filters by library strategy (RNA-Seq, WGS, ChIP-Seq, etc.)
 
         Args:
             organism: Target organism
@@ -94,14 +96,25 @@ class QueryBuilder:
             experiment: Experiment type
 
         Returns:
-            SRA-optimized query
+            SRA-optimized query with strategy filters
         """
         base_query = self.build_ncbi_query(organism, condition, experiment)
 
-        # Add SRA-specific filters
+        # Add SRA-specific strategy filters based on experiment type
         strategy_filter = ""
-        if "rna" in experiment.lower() or "transcriptome" in experiment.lower():
+        experiment_lower = experiment.lower()
+
+        # Map experiment types to SRA strategies
+        if any(term in experiment_lower for term in ["rna", "transcriptome"]):
             strategy_filter = " AND strategy_rna_seq[Properties]"
+        elif any(term in experiment_lower for term in ["chip", "chromatin immunoprecipitation"]):
+            strategy_filter = " AND strategy_chip_seq[Properties]"
+        elif "atac" in experiment_lower:
+            strategy_filter = " AND strategy_atac_seq[Properties]"
+        elif any(term in experiment_lower for term in ["bisulfite", "methylation"]):
+            strategy_filter = " AND strategy_bisulfite_seq[Properties]"
+        elif any(term in experiment_lower for term in ["wgs", "whole genome"]):
+            strategy_filter = " AND strategy_wgs[Properties]"
 
         return base_query + strategy_filter
 
@@ -114,21 +127,32 @@ class QueryBuilder:
         """
         Build query for GEO database.
 
+        GEO contains expression profiling, genome binding/occupancy, methylation, and other data types.
+
         Args:
             organism: Target organism
             condition: Experimental condition
             experiment: Experiment type
 
         Returns:
-            GEO-optimized query
+            GEO-optimized query with dataset type filters
         """
         base_query = self.build_ncbi_query(organism, condition, experiment)
 
-        # Add GEO-specific filters for expression data
-        if "rna" in experiment.lower():
-            base_query += " AND expression profiling by high throughput sequencing[DataSet Type]"
+        # Add GEO-specific filters based on experiment type
+        experiment_lower = experiment.lower()
+        dataset_filter = ""
 
-        return base_query
+        if any(term in experiment_lower for term in ["rna", "transcriptome"]):
+            dataset_filter = " AND expression profiling by high throughput sequencing[DataSet Type]"
+        elif any(term in experiment_lower for term in ["chip", "binding"]):
+            dataset_filter = " AND genome binding/occupancy profiling by high throughput sequencing[DataSet Type]"
+        elif any(term in experiment_lower for term in ["methylation", "bisulfite"]):
+            dataset_filter = " AND methylation profiling by high throughput sequencing[DataSet Type]"
+        elif "microarray" in experiment_lower:
+            dataset_filter = " AND expression profiling by array[DataSet Type]"
+
+        return base_query + dataset_filter
 
     def build_ena_query(
         self,
@@ -237,7 +261,14 @@ class QueryBuilder:
 
     def _expand_condition(self, condition: str, separator: str = " OR ") -> str:
         """
-        Expand condition with synonyms.
+        Expand condition with synonyms from domain vocabularies.
+
+        Supports diverse plant conditions including:
+        - Abiotic stress (salt, drought, cold, heat, UV, etc.)
+        - Biotic stress (pathogen, herbivory, elicitor)
+        - Hormones (auxin, cytokinin, ABA, ethylene, etc.)
+        - Development (flowering, germination, senescence, etc.)
+        - Treatments (chemical, light, circadian)
 
         Args:
             condition: Experimental condition
@@ -248,22 +279,10 @@ class QueryBuilder:
         """
         terms = [condition]
 
-        # Define common synonyms
-        synonyms = {
-            "salt": ["salt stress", "salt", "NaCl", "salinity", "sodium chloride"],
-            "drought": ["drought", "water deficit", "water stress", "dehydration"],
-            "cold": ["cold stress", "cold", "low temperature", "chilling"],
-            "heat": ["heat stress", "heat", "high temperature"],
-            "uv": ["UV", "UV-B", "ultraviolet", "UV radiation"],
-            "oxidative": ["oxidative stress", "H2O2", "hydrogen peroxide", "ROS"],
-            "pathogen": ["pathogen", "infection", "disease", "biotic stress"],
-            "nutrient": ["nutrient", "nitrogen", "phosphorus", "deficiency"]
-        }
-
-        # Check if condition matches any synonym category
+        # Check if condition matches any synonym category from domain vocabularies
         condition_lower = condition.lower()
-        for key, synonym_list in synonyms.items():
-            if key in condition_lower:
+        for key, synonym_list in CONDITION_SYNONYMS.items():
+            if key in condition_lower or any(syn.lower() in condition_lower for syn in synonym_list):
                 terms = synonym_list
                 break
 
@@ -271,44 +290,30 @@ class QueryBuilder:
 
     def _expand_experiment(self, experiment: str, separator: str = " OR ") -> str:
         """
-        Expand experiment type with variations.
+        Expand experiment type with variations from domain vocabularies.
+
+        Supports diverse plant bioinformatics experiments including:
+        - Transcriptomics: RNA-seq, single-cell RNA-seq, microarray, small RNA
+        - Genomics: WGS, resequencing, targeted sequencing, ddRAD
+        - Epigenomics: ChIP-seq, ATAC-seq, bisulfite-seq, DNase-seq, MNase-seq
+        - Proteomics: proteomics, phosphoproteomics
+        - Other: Hi-C, CLIP-seq, ribosome profiling, degradome, ChIA-PET
 
         Args:
             experiment: Experiment type
             separator: Separator for terms
 
         Returns:
-            Expanded experiment string
+            Expanded experiment string with variations
         """
         terms = [experiment]
 
-        # RNA-seq variations
-        if "rna" in experiment.lower():
-            terms = [
-                "RNA-seq",
-                "RNAseq",
-                "RNA seq",
-                "transcriptome",
-                "transcriptomic",
-                "transcriptomics"
-            ]
-
-        # ChIP-seq variations
-        elif "chip" in experiment.lower():
-            terms = [
-                "ChIP-seq",
-                "ChIPseq",
-                "ChIP seq",
-                "chromatin immunoprecipitation"
-            ]
-
-        # ATAC-seq variations
-        elif "atac" in experiment.lower():
-            terms = [
-                "ATAC-seq",
-                "ATACseq",
-                "ATAC seq"
-            ]
+        # Check if experiment matches any synonym category from domain vocabularies
+        experiment_lower = experiment.lower()
+        for key, synonym_list in EXPERIMENT_SYNONYMS.items():
+            if key in experiment_lower or any(syn.lower() in experiment_lower for syn in synonym_list):
+                terms = synonym_list
+                break
 
         return separator.join(terms)
 

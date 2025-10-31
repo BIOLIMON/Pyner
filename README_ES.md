@@ -375,19 +375,6 @@ mypy pyner/
 2. Deshabilitar filtrado: `--no-quality-filter`
 3. Personalizar pesos de calidad (ver Uso Avanzado)
 
-## Citación
-
-Si usas Pyner en tu investigación, por favor cita:
-
-```bibtex
-@software{pyner2024,
-  title = {Pyner: Minería de datos bioinformáticos compatible con PRISMA},
-  author = {Tu Laboratorio},
-  year = {2024},
-  url = {https://github.com/yourlab/pyner}
-}
-```
-
 Por favor también cita la declaración PRISMA 2020:
 
 > Page MJ, McKenzie JE, Bossuyt PM, et al. The PRISMA 2020 statement: an updated guideline for reporting systematic reviews. *BMJ* 2021;372:n71. doi:10.1136/bmj.n71
@@ -402,12 +389,6 @@ Licencia MIT - ver archivo [LICENSE](LICENSE) para detalles.
 - Guías PRISMA: http://www.prisma-statement.org/
 - NCBI E-utilities: https://www.ncbi.nlm.nih.gov/books/NBK25501/
 - BioPython: https://biopython.org/
-
-## Contacto
-
-- **Issues**: https://github.com/yourlab/pyner/issues
-- **Email**: contact@lab.org
-- **Documentación**: https://github.com/yourlab/pyner/wiki
 
 ---
 
